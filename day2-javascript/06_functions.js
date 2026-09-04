@@ -1,10 +1,12 @@
 function calculateTotal(unitPrice, count) {
   // ***** TODO 1. 수량이 0 이하이면 0을 반환하고 종료하기 *****
-
+  if (count <= 0) {
+    return 0;
+  }
   // **************************************************************
   const calculation = unitPrice * count;
   // ***** TODO 2. 계산한 금액을 호출한 자리로 반환하기 *****
-
+  return calculation;
   // **************************************************************
 }
 const coffeeTotal = calculateTotal(3200, 2);
@@ -28,7 +30,7 @@ const message = "함수 밖 문장";
 function makeGreeting(name = "방문자") {
   const message = `안녕하세요, ${name}님.`;
   // ***** TODO 3. 함수 안에서 만든 인사 문장을 반환하기 *****
-
+  return message;
   // **************************************************************
 }
 console.log("이름 전달:", makeGreeting("하늘"));
@@ -40,6 +42,10 @@ console.log("바깥 문장 유지:", message);
 let applyDiscount;
 // ***** TODO 4. 금액에서 1000을 뺀 값을 반환하는 함수 표현식 저장하기 *****
 
+// function type으로 변환
+applyDiscount = function (amount) {
+  return amount - 1000;
+}
 // **************************************************************
 if (typeof applyDiscount === "function") {
   const savedFunction = applyDiscount;
