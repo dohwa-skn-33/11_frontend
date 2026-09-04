@@ -640,6 +640,10 @@ pre code {
   text-align: right;
 }
 
+.lesson-pagination > :only-child {
+  text-align: left;
+}
+
 .lesson-pagination small {
   display: block;
   color: var(--muted);
