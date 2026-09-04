@@ -1,7 +1,7 @@
 const basket = ["우유", "빵"];
 let newLength;
 // ***** TODO 1. basket 끝에 사과를 추가하고 새 길이 저장하기 *****
-
+newLength = basket.push("사과");
 // **************************************************************
 console.log("push 반환값:", newLength);
 console.log("push 뒤 원본:", basket);
@@ -14,7 +14,7 @@ console.log("빈 배열의 pop:", [].pop());
 const books = [
   { title: "작은 숲", available: true },
   { title: "도시 산책", available: false },
-  { title: "바다 일기", available: true }
+  { title: "바다 일기", available: true },
 ];
 const forEachResult = books.forEach(function (book) {
   console.log("항목별 출력:", book.title);
@@ -25,19 +25,25 @@ let foundBook;
 let availableBooks = [];
 let titleLines = [];
 // ***** TODO 2. 제목이 도시 산책인 첫 객체를 찾는 메서드를 골라 작성하기 *****
-
+foundBook = books.find((book) => book.title === "도시 산책");
 // **************************************************************
 // ***** TODO 3. 대출 가능한 객체만 담는 메서드를 골라 작성하기 *****
-
+availableBooks = books.filter((book) => book.available);
 // **************************************************************
 // ***** TODO 4. 각 객체를 제목 문자열로 바꾸는 메서드를 골라 작성하기 *****
-
+titleLines = books.map((book) => `${book.title}`);
 // **************************************************************
 console.log("find 결과:", foundBook);
 console.log("filter 결과:", availableBooks);
 console.log("map 결과:", titleLines);
-console.log("없는 제목의 find:", books.find((book) => book.title === "없는 제목"));
-console.log("없는 제목의 filter:", books.filter((book) => book.title === "없는 제목"));
+console.log(
+  "없는 제목의 find:",
+  books.find((book) => book.title === "없는 제목"),
+);
+console.log(
+  "없는 제목의 filter:",
+  books.filter((book) => book.title === "없는 제목"),
+);
 console.log("원본 첫 제목:", books[0].title);
 
 const originalItems = [{ title: "연필", quantity: 1 }];
@@ -52,7 +58,7 @@ console.log("각 배열의 길이:", originalItems.length, pickedItems.length);
 const selectedTitles = ["작은 숲", "바다 일기"];
 let selectedBooks = [];
 // ***** TODO 5. 선택 제목에 포함되는 책 객체만 새 배열로 고르기 *****
-
+selectedBooks = books.filter((book) => selectedTitles.includes(book.title));
 // **************************************************************
 selectedBooks.forEach(function (book) {
   console.log("선택한 책:", book.title);
