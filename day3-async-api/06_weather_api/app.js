@@ -15,20 +15,23 @@ function setWeatherBusy(busy) {
 
 function renderWeather(data) {
   // ***** TODO 1. 장소와 날씨 설명을 카드의 요소에 표시하기 *****
-
+  document.querySelector("#weather-place").textContent = data.place;
+  document.querySelector("#weather-description").textContent = data.description;
   // **************************************************************
 
   // ***** TODO 2. 숫자 값에 단위를 붙여 기온·습도·풍속 표시하기 *****
-
+  document.querySelector("#weather-temperature").textContent = `${data.temperature} ℃`;
+  document.querySelector("#weather-feels-like").textContent = `${data.feelsLike} ℃`;
+  document.querySelector("#weather-humidity").textContent = `${data.humidity} %`;
+  document.querySelector("#weather-wind").textContent = `${data.windSpeed} m/s`;
   // **************************************************************
-
   document.querySelector("#weather-source").textContent = data.source;
   document.querySelector("#weather-fetched-at").textContent = data.fetchedAt;
   weatherCard.hidden = false;
 }
 
 async function handleWeatherSubmit(event) {
-  event.preventDefault();
+  event.preventDefault(); // form 제출 기본 이벤트 막기
   if (weatherButton.disabled || !requireHttp(weatherStatus)) return;
 
   weatherCard.hidden = true;
@@ -39,7 +42,15 @@ async function handleWeatherSubmit(event) {
   try {
     let url;
     // ***** TODO 3. 좌표를 나누고 lessonApiUrl로 GET 요청 URL 만들기 *****
-
+    const [lat, lon] = citySelect.value.split(",");
+    
+    // HTTP method='GET' (조회 전용) 요청 시
+    // 서버로 데이터를 전달하는 문자열 == query string
+    // -> ?K=V&K=V&...
+    const params = new URLSearchParams({ lat, lon, mode: modeSelect.value });
+    // http://127.0.0.1:8001/api/weather?lat=37.11&lon=128.323&mode=text
+    
+    url = lessonApiUrl(`/api/weather?${params}`);
     // **************************************************************
     if (url === undefined) {
       showStatus(weatherStatus, "요청 URL 작성 대기 상태이다.", "idle");
@@ -48,7 +59,7 @@ async function handleWeatherSubmit(event) {
 
     let response;
     // ***** TODO 4. 날씨 API를 요청하고 HTTP 실패를 오류로 바꾸기 *****
-
+    response = await fetch(url); // server.py의 응답(json 포함) 반환
     // **************************************************************
     if (response === undefined) {
       showStatus(weatherStatus, "날씨 요청 작성 대기 상태이다.", "idle");
@@ -56,7 +67,10 @@ async function handleWeatherSubmit(event) {
     }
 
     // ***** TODO 5. JSON을 해석해 카드와 원본 보기 갱신하기 *****
-
+    const data = await response.json();
+    renderWeather(data);
+    rawOutput.textContent = JSON.stringify(data, null, 2);
+    showStatus(weatherStatus, `${data.place} 날씨를 불러왔다.`, "success");
     // **************************************************************
   } catch (error) {
     weatherCard.hidden = true;
