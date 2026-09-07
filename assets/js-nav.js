@@ -25,14 +25,17 @@
       ],
     },
     day3: {
-      title: "DAY 3 · DATA & FETCH",
+      title: "DAY 3 · DOM & AJAX",
       directory: "day3-async-api",
       pages: [
-        ["01", "요소 생성과 추가", "01_create_append/index.html"],
-        ["02", "배열로 화면 그리기", "02_render_list/index.html"],
+        ["00", "폼 제출과 입력 검증", "00_form_submit/index.html"],
+        ["01", "DOM 카드 생성·삭제", "01_create_append/index.html"],
+        ["02", "표·검색·이벤트 위임", "02_render_list/index.html"],
         ["03", "Promise와 async / await", "03_async_await/index.html"],
-        ["04", "Fetch로 JSON 읽기", "04_fetch_json/index.html"],
-        ["05", "폼과 API 요청", "05_form_api/index.html"],
+        ["04", "AJAX와 text / JSON", "04_fetch_json/index.html"],
+        ["05", "폼과 POST 검색", "05_form_api/index.html"],
+        ["06", "OpenWeather API", "06_weather_api/index.html"],
+        ["07", "OpenAI API", "07_openai_api/index.html"],
       ],
     },
   };
