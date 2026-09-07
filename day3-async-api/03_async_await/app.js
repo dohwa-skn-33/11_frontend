@@ -15,12 +15,14 @@ async function compareValues(shouldFail) {
   showValue(awaitedOutput, "아직 결과를 기다리는 중이다.");
 
   // ***** TODO 1. 즉시 사용할 수 있는 일반 문자열을 화면에 출력하기 *****
-
+  const directValue = "바로 받은 문자열";
+  showValue(directOutput, directValue);
   // **************************************************************
 
   let promise;
   // ***** TODO 2. requestMessage가 즉시 반환한 Promise 객체 확인하기 *****
-
+  promise = requestMessage(shouldFail); // Promise 반환 (비동기, 다음 코드 바로 실행)
+  showValue(promiseOutput, promise);
   // **************************************************************
   if (!(promise instanceof Promise)) {
     showValue(awaitedOutput, "TODO 2를 먼저 완성한다.");
@@ -32,12 +34,13 @@ async function compareValues(shouldFail) {
 
   try {
     // ***** TODO 3. Promise의 완료 결과를 await로 받아 화면에 출력하기 *****
-
+    const message = await promise; // requestMessage() 결과를 받을 때까지 대기
+    showValue(awaitedOutput, message); // promise 결과를 받은 후 실행
     // **************************************************************
     appendLine(logList, "3. await 다음 줄이 실행되었다.");
   } catch (error) {
     // ***** TODO 4. 실패하면 error.message를 결과 칸에 출력하기 *****
-
+    showValue(awaitedOutput, error.message);
     // **************************************************************
     appendLine(logList, "3. catch가 실패 결과를 처리했다.");
   } finally {
@@ -47,7 +50,18 @@ async function compareValues(shouldFail) {
 }
 
 // ***** TODO 5. 실행 버튼에서 async 함수를 호출하고 반환값도 Promise인지 확인하기 *****
+runButton.addEventListener("click", function () {
 
+  // compareValues()는 내부적으로 동기식이 포함된 [비동기 함수]
+  // -> 해당 함수를 호출하고 바로 다음 줄 실행
+  const returnedValue = compareValues(mode.value === "error");
+
+  // 비동기 실행 중인 returnedValue에 대입된 함수 compareValues()
+  // -> async 함수는 Promise를 반환하게 되어있다
+  // -> returnedValue의 반환 타입 Promise가 맞는지 확인
+  showValue(returnOutput, returnedValue instanceof Promise);
+  appendLine(logList, "2. 함수 밖 코드는 await를 기다리지 않고 실행되었다.");
+});
 // **************************************************************
 
 // 제공 연결 코드: await 중에도 다른 클릭 이벤트는 처리된다.
