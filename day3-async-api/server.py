@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """프런트엔드 요청/응답 실습 전용 로컬 mock 서버이다.
 
-데이터 저장/인증/배포 기능은 없다.
+학생이 작성할 백엔드 코드가 아니다. 데이터 저장/인증/배포 기능은 없다.
 Python 표준 라이브러리만 사용하며 127.0.0.1에만 바인딩한다.
 """
 import argparse
@@ -17,6 +17,38 @@ from urllib.request import Request, urlopen
 
 UNIT_ROOT = Path(__file__).resolve().parent
 SERVE_ROOT = UNIT_ROOT.parent
+SUPPORTED_ENV_NAMES = {
+    "OPENWEATHER_API_KEY",
+    "OPENAI_API_KEY",
+    "OPENAI_MODEL",
+}
+
+
+def load_local_env(path):
+    """같은 폴더의 단순한 KEY=VALUE 설정만 환경변수에 추가한다."""
+    if not path.is_file():
+        return False
+
+    for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line.removeprefix("export ").lstrip()
+
+        name, separator, raw_value = line.partition("=")
+        name = name.strip()
+        if not separator or name not in SUPPORTED_ENV_NAMES:
+            continue
+
+        value = raw_value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        os.environ.setdefault(name, value)
+
+    return True
+
+
 BOOKS = json.loads((UNIT_ROOT / "data" / "books.json").read_text(encoding="utf-8"))["items"]
 MAX_BODY_BYTES = 4096
 UPSTREAM_LIMIT_BYTES = 1024 * 1024
@@ -50,8 +82,6 @@ MOCK_CITIES = (
 
 
 class LessonHandler(SimpleHTTPRequestHandler):
-    allow_live_api = False
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(SERVE_ROOT), **kwargs)
 
@@ -229,8 +259,8 @@ class LessonHandler(SimpleHTTPRequestHandler):
             self.send_json(200, result)
             return
         api_key = os.environ.get("OPENWEATHER_API_KEY")
-        if not self.allow_live_api or not api_key:
-            self.send_json(503, {"message": "실제 날씨 API 사용이 허용되지 않았거나 서버 키가 설정되지 않았다."})
+        if not api_key:
+            self.send_json(503, {"message": "실제 날씨 API를 사용하려면 서버의 OPENWEATHER_API_KEY 설정이 필요하다."})
             return
         query = urlencode({
             "lat": lat,
@@ -285,8 +315,8 @@ class LessonHandler(SimpleHTTPRequestHandler):
         else:
             api_key = os.environ.get("OPENAI_API_KEY")
             configured_model = os.environ.get("OPENAI_MODEL")
-            if not self.allow_live_api or not api_key or not configured_model:
-                self.send_json(503, {"message": "실제 OpenAI API 사용이 허용되지 않았거나 서버 환경변수가 설정되지 않았다."})
+            if not api_key or not configured_model:
+                self.send_json(503, {"message": "실제 OpenAI API를 사용하려면 서버의 OPENAI_API_KEY와 OPENAI_MODEL 설정이 필요하다."})
                 return
             request_body = json.dumps(
                 {
@@ -335,24 +365,19 @@ class LessonHandler(SimpleHTTPRequestHandler):
 
 
 def main():
+    env_file_loaded = load_local_env(UNIT_ROOT / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8001)
-    parser.add_argument(
-        "--allow-live-api",
-        action="store_true",
-        help="환경변수에 설정한 외부 API 키를 사용하는 live 예제를 허용한다.",
-    )
     args = parser.parse_args()
-    LessonHandler.allow_live_api = args.allow_live_api
     server = ThreadingHTTPServer(("127.0.0.1", args.port), LessonHandler)
     print("프런트엔드 실습용 mock 서버이다. 운영 배포에 사용하지 않는다.", flush=True)
     print(f"API 주소=http://127.0.0.1:{server.server_port}/api/", flush=True)
     print("HTML은 VS Code Live Server의 5500 포트로 연다.", flush=True)
     print(
-        "live 허용=" + str(args.allow_live_api)
-        + ", OpenWeather 키 설정=" + str(bool(os.environ.get("OPENWEATHER_API_KEY")))
-        + ", OpenAI 키 설정=" + str(bool(os.environ.get("OPENAI_API_KEY")))
-        + ", OpenAI 모델 설정=" + str(bool(os.environ.get("OPENAI_MODEL"))),
+        ".env 읽음=" + str(env_file_loaded)
+        + ", OpenWeather live 사용 가능=" + str(bool(os.environ.get("OPENWEATHER_API_KEY")))
+        + ", OpenAI live 사용 가능="
+        + str(bool(os.environ.get("OPENAI_API_KEY") and os.environ.get("OPENAI_MODEL"))),
         flush=True,
     )
     try:
